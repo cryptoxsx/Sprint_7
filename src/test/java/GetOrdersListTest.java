@@ -1,30 +1,14 @@
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.*;
 import io.qameta.allure.Step;
-
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 public class GetOrdersListTest {
-
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
-    }
+    private final OrdersApiClient client = new OrdersApiClient();
 
     @Step("Получить список всех доступных заказов")
     private Response getOrdersList(){
-        Response response =
-                given()
-                        .get("/api/v1/orders");
-
-        response.then()
-                .statusCode(200)
-                .body("orders", notNullValue())
-                .body("orders.size()", greaterThan(0));
-
-        return response;
+        return client.getOrdersList();
     }
 
     @Test
