@@ -12,22 +12,31 @@ public class CreateOrderTest {
     @Parameterized.Parameters(name = "color: {0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { "Black.json" },
-                { "Grey.json" },
-                { "BlackAndGrey.json" },
-                { "WithoutColor.json" }
+                { Arrays.asList("BLACK") },
+                { Arrays.asList("GREY") },
+                { Arrays.asList("BLACK", "GREY") },
+                { Arrays.asList() }
         });
     }
 
-    private final String fileName;
+    private final List<String> colors;
     private final OrdersApiClient ordersClient = new OrdersApiClient();
-    public CreateOrderTest(String fileName) {
-        this.fileName = fileName;
+    public CreateOrderTest(List<String> colors) {
+        this.colors = colors;
     }
 
     @Test
     public void createOrderWithColorParameterized() {
-        int track = ordersClient.createOrderFromFile("src/test/resources/" + fileName);
+        OrderModel order = new OrderModel();
+        order.setFirstName("Naruto");
+        order.setLastName("Uchiha");
+        order.setAddress("Konoha, 142 apt.");
+        order.setMetroStation("4");
+        order.setPhone("+78003553535");
+        order.setColor(colors);
+        order.setComment("Saske, come back to Konoha");
+
+        int track = ordersClient.createOrder(order);
         assertThat(track, notNullValue());
     }
 }

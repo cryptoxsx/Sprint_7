@@ -8,24 +8,26 @@ public class CreateCourierTest {
 
     @Test
     public void createNewCourierAndCheckResponse() {
-        Response createResponse = client.createCourier("ninja4355", "1234", "saske");
+        CourierModel courier = new CourierModel("ninja4355", "1234", "saske");
+        Response createResponse = client.createCourier(courier);
         createResponse.then()
                 .statusCode(201)
                 .body("ok", equalTo(true));
 
-        Response loginResponse = client.loginCourier("ninja4355", "1234");
+        Response loginResponse = client.loginCourier(courier.getLogin(), courier.getPassword());
         courierId = loginResponse.jsonPath().getInt("id");
     }
 
     @Test
     public void dublicateCreateNewCourierReturnsError() {
-        client.createCourier("ninja4355", "1234", "saske");
-        Response dublicateResponse = client.createCourier("ninja4355", "1234", "saske");
+        CourierModel courier = new CourierModel("ninja4355", "1234", "saske");
+        client.createCourier(courier);
+        Response dublicateResponse = client.createCourier(courier);
         dublicateResponse.then()
                 .statusCode(409)
                 .body("message", containsString("Этот логин уже используется"));
 
-        Response loginResponse = client.loginCourier("ninja4355", "1234");
+        Response loginResponse = client.loginCourier(courier.getLogin(), courier.getPassword());
         courierId = loginResponse.jsonPath().getInt("id");
     }
 

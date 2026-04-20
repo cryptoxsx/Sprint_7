@@ -8,8 +8,9 @@ public class LoginCourierTest {
 
     @Test
     public void loginCourierAndCheckResponse() {
-        client.createCourier("ninja4356", "1234", "saske");
-        Response loginResponse = client.loginCourier("ninja4356", "1234");
+        CourierModel courier = new CourierModel("ninja4356", "1234", "saske");
+        client.createCourier(courier);
+        Response loginResponse = client.loginCourier(courier.getLogin(), courier.getPassword());
         loginResponse.then()
                 .statusCode(200)
                 .body("id", notNullValue());
@@ -42,8 +43,8 @@ public class LoginCourierTest {
 
     @Test
     public void loginWithWrongPasswordReturnsError() {
-        client.createCourier("ninja4356", "1234", "saske");
-
+        CourierModel courier = new CourierModel("ninja4356", "1234", "saske");
+        client.createCourier(courier);
         Response loginResponse = client.loginCourier("ninja4356", "12341234");
         loginResponse.then()
                 .statusCode(404)

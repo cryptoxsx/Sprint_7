@@ -2,7 +2,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import java.io.File;
+import io.qameta.allure.Step;
 
 public class OrdersApiClient {
 
@@ -12,13 +12,12 @@ public class OrdersApiClient {
         RestAssured.baseURI = BASE_URI;
     }
 
-    public int createOrderFromFile(String jsonPath) {
-        File file = new File(jsonPath);
-
+    @Step("Создать заказ")
+    public int createOrder(OrderModel order) {
         Response response =
                 given()
                         .header("Content-type", "application/json")
-                        .body(file)                 // RestAssured сам читает файл
+                        .body(order)                 // RestAssured сам читает файл
                         .post("/api/v1/orders");
 
         response.then()
@@ -28,6 +27,7 @@ public class OrdersApiClient {
         return response.body().jsonPath().getInt("track");
     }
 
+    @Step("Получить список заказов")
     public Response getOrdersList() {
         return given()
                 .get("/api/v1/orders");
