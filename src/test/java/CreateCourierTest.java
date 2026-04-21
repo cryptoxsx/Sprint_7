@@ -6,29 +6,31 @@ public class CreateCourierTest {
     private final CourierApiClient client = new CourierApiClient();
     private int courierId;
 
-    @Test
-    public void createNewCourierAndCheckResponse() {
-        CourierModel courier = new CourierModel("ninja4355", "1234", "saske");
+    private static final String LOGIN = "ninja4355";
+    private static final String PASSWORD = "1234";
+    private static final String FIRST_NAME = "saske";
+
+    @Before
+    public void createCourierIfNotExists() {
+        CourierModel courier = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
         Response createResponse = client.createCourier(courier);
         createResponse.then()
                 .statusCode(201)
                 .body("ok", equalTo(true));
+    }
 
-        Response loginResponse = client.loginCourier(courier.getLogin(), courier.getPassword());
-        courierId = loginResponse.jsonPath().getInt("id");
+    @Test
+    public void createNewCourierAndCheckResponse() {
     }
 
     @Test
     public void dublicateCreateNewCourierReturnsError() {
-        CourierModel courier = new CourierModel("ninja4355", "1234", "saske");
+        CourierModel courier = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
         client.createCourier(courier);
         Response dublicateResponse = client.createCourier(courier);
         dublicateResponse.then()
                 .statusCode(409)
                 .body("message", containsString("Этот логин уже используется"));
-
-        Response loginResponse = client.loginCourier(courier.getLogin(), courier.getPassword());
-        courierId = loginResponse.jsonPath().getInt("id");
     }
 
     @Test
@@ -48,7 +50,12 @@ public class CreateCourierTest {
     }
 
     @After
-    public void deleteCourierAfterTest() {
+    public void loginAndDeleteCourierAfterTest() {
+        Response loginResponse = client.loginCourier(LOGIN, PASSWORD);
+        loginResponse.then()
+                .statusCode(200)
+                .body("id", notNullValue());
+        courierId = loginResponse.jsonPath().getInt("id");
         if (courierId > 0) {
             client.deleteCourier(courierId);
         }

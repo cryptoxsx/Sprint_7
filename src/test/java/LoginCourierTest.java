@@ -6,15 +6,22 @@ public class LoginCourierTest {
     private final CourierApiClient client = new CourierApiClient();
     private int courierId;
 
+    private static final String LOGIN = "ninja4356";
+    private static final String PASSWORD = "1234";
+    private static final String FIRST_NAME = "saske";
+
+    @Before
+    public void createCourierForLogin() {
+        CourierModel courier = new CourierModel(LOGIN, PASSWORD, FIRST_NAME);
+        client.createCourier(courier);
+    }
+
     @Test
     public void loginCourierAndCheckResponse() {
-        CourierModel courier = new CourierModel("ninja4356", "1234", "saske");
-        client.createCourier(courier);
-        Response loginResponse = client.loginCourier(courier.getLogin(), courier.getPassword());
+        Response loginResponse = client.loginCourier(LOGIN, PASSWORD);
         loginResponse.then()
                 .statusCode(200)
                 .body("id", notNullValue());
-        courierId = loginResponse.jsonPath().getInt("id");
     }
 
     @Test
@@ -35,7 +42,7 @@ public class LoginCourierTest {
 
     @Test
     public void loginWithWrongLoginReturnsError() {
-        Response loginResponse = client.loginCourier("ninja12121212", "1234000");
+        Response loginResponse = client.loginCourier("ninja12121212", PASSWORD);
         loginResponse.then()
                 .statusCode(404)
                 .body("message", containsString("Учетная запись не найдена"));
@@ -43,16 +50,19 @@ public class LoginCourierTest {
 
     @Test
     public void loginWithWrongPasswordReturnsError() {
-        CourierModel courier = new CourierModel("ninja4356", "1234", "saske");
-        client.createCourier(courier);
-        Response loginResponse = client.loginCourier("ninja4356", "12341234");
+        Response loginResponse = client.loginCourier(LOGIN, "12341234");
         loginResponse.then()
                 .statusCode(404)
                 .body("message", containsString("Учетная запись не найдена"));
     }
 
     @After
-    public void deleteCourierAfterTest() {
+    public void loginAndDeleteCourierAfterTest() {
+        Response loginResponse = client.loginCourier(LOGIN, PASSWORD);
+        loginResponse.then()
+                .statusCode(200)
+                .body("id", notNullValue());
+        courierId = loginResponse.jsonPath().getInt("id");
         if (courierId > 0) {
             client.deleteCourier(courierId);
         }
